@@ -478,7 +478,8 @@ int main(void)
 	}
 }
 
-static int counter = 0;
+static uint8_t counter1 = 0;
+static uint8_t counter2 = 0;
 
 void ble_write_thread(void)
 {
@@ -492,7 +493,8 @@ void ble_write_thread(void)
 			.len = 170,
 		};
 
-		memset(buf.data, counter, buf.len);
+		buf.data[0] = counter1;
+		buf.data[1] = counter2;
 
 		LOG_HEXDUMP_INF(buf.data, buf.len, "Sending data");
 
@@ -500,9 +502,15 @@ void ble_write_thread(void)
 			LOG_WRN("Failed to send data over BLE connection");
 		}
 
-		counter++;
-		if (counter > 100) {
-			counter = 0;
+		counter2++;
+		if (counter2 > 100) {
+			if (counter1 > 100) {
+				counter2 = 0;
+				counter1 = 0;
+			} else {
+				counter1++;
+				counter2 = 0;
+			}
 		}
 
 		k_msleep(10);
